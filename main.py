@@ -10,15 +10,18 @@ while True:
         break
 
     fgmask = fgbg.apply(frame)
-    
-    # Wykrycie krawędzi na masce
-    edges = cv2.Canny(fgmask, 30, 150)
 
-    # Nałożenie krawędzi na oryginalną klatkę
-    frame_with_edges = cv2.bitwise_and(frame, frame, mask=edges)
+    # Wykrycie krawędzi na obrazie przetworzonym
+    edges = cv2.Canny(frame, 30, 150)
 
-    # Wyświetlenie oryginalnej klatki z nałożonymi krawędziami
-    cv2.imshow('frame with edges', frame_with_edges)
+    # Stworzenie obrazu zawierającego tylko zarysy krawędzi
+    edges_colored = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+    edges_colored[np.where((edges_colored==[255,255,255]).all(axis=2))] = [0,0,255]
+
+    # Połączenie oryginalnego obrazu z kamerki z zarysami krawędzi
+    result = cv2.addWeighted(frame, 0.7, edges_colored, 0.3, 0)
+
+    cv2.imshow('Original Frame with Edges', result)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
